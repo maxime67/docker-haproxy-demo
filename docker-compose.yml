@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  apache1:
+    image: httpd:2.4
+    container_name: apache1
+    volumes:
+      - ./apache1/html:/usr/local/apache2/htdocs/
+    environment:
+      - SERVER_NAME=apache1
+    networks:
+      - web_network
+
+  apache2:
+    image: httpd:2.4
+    container_name: apache2
+    volumes:
+      - ./apache2/html:/usr/local/apache2/htdocs/
+    environment:
+      - SERVER_NAME=apache2
+    networks:
+      - web_network
+
+  haproxy:
+    image: haproxy:2.8
+    container_name: haproxy
+    ports:
+      - "80:80"
+      - "8404:8404" # Port pour les statistiques HAProxy
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - apache1
+      - apache2
+    networks:
+      - web_network
+
+networks:
+  web_network:
+    driver: bridge
